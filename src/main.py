@@ -206,7 +206,7 @@ if __name__ == "__main__":
         "norms": norms
     }
 
-    filename = f"update-{args.update}-lr-{args.lr}-wd-{args.wd}-seed-{args.seed}.pkl"
+    filename = f"update-{args.update}-lr-{args.lr}-wd-{args.wd}-seed-{args.seed}-epochs-{args.epochs}.pkl"
     os.makedirs("results", exist_ok=True)
 
     print(f"Saving results to {os.path.join('results', filename)}")
