@@ -151,6 +151,8 @@ def weight_stats(model):
         u,s,v = torch.svd(p)
         singular_values.append(s)
         norms.append(p.norm())
+    singular_values = [s.detach().cpu().numpy() for s in singular_values]
+    norms = [n.detach().cpu().numpy() for n in norms]
     return singular_values, norms
 
 
