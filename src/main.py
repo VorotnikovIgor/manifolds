@@ -43,7 +43,8 @@ class MLP(nn.Module):
 
 
 def train(epochs, initial_lr, update, wd):
-    model = MLP() #.cuda()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = MLP().to(device)
     print(model.fc1.weight.reshape(-1)[:3])
     criterion = nn.CrossEntropyLoss()
 
@@ -69,8 +70,8 @@ def train(epochs, initial_lr, update, wd):
         running_loss = 0.0
         # print(len(train_loader))
         for i, (images, labels) in tqdm(enumerate(train_loader)):
-            # images = images.cuda()
-            # labels = labels.cuda()
+            images = images.to(device)
+            labels = labels.to(device)
 
             # Forward pass
             outputs = model(images)
@@ -104,16 +105,12 @@ def train(epochs, initial_lr, update, wd):
         running_loss = 0.0
         with torch.no_grad():
             for i, (images, labels) in enumerate(test_loader):
-                # images = images.cuda()
-                # labels = labels.cuda()
+                images = images.to(device)
+                labels = labels.to(device)
 
                 # Forward pass
                 outputs = model(images)
                 loss = criterion(outputs, labels)
-
-                # Backward and optimize
-                # model.zero_grad()
-                # loss.backward()
 
                 running_loss += loss.item()
 
@@ -125,6 +122,7 @@ def train(epochs, initial_lr, update, wd):
 
 
 def eval(model):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # Test the model
     model.eval()
     with torch.no_grad():
@@ -133,8 +131,8 @@ def eval(model):
             correct = 0
             total = 0
             for images, labels in dataloader:
-                # images = images.cuda()
-                # labels = labels.cuda()
+                images = images.to(device)
+                labels = labels.to(device)
                 outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
