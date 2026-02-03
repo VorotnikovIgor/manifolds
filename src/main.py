@@ -42,7 +42,7 @@ class MLP(nn.Module):
         return x
 
 
-def train(epochs, initial_lr, update, wd):
+def train(epochs, initial_lr, update, wd, on_manifold, T):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = MLP().to(device)
     print(model.fc1.weight.reshape(-1)[:3])
@@ -60,7 +60,7 @@ def train(epochs, initial_lr, update, wd):
     if optimizer is None:
         # Project the weights to the manifold
         for p in model.parameters():
-            p.data = update(p.data, torch.zeros_like(p.data), eta=0)
+            p.data = update(p.data, torch.zeros_like(p.data), eta=0, steps=T, on_manifold=on_manifold)
 
     epoch_losses = []
     epoch_times = []
@@ -161,6 +161,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator.")
     parser.add_argument("--wd", type=float, default=0.0, help="Weight decay for AdamW.")
     parser.add_argument("--steps", type=int, default=100, help="Steps for manifold_muon.")
+    parser.add_argument("--on_manifold", type=bool, default=True)
     args = parser.parse_args()
 
     # determinism flags
@@ -186,7 +187,9 @@ if __name__ == "__main__":
         epochs=args.epochs,
         initial_lr=args.lr,
         update=update,
-        wd=args.wd
+        wd=args.wd,
+        on_manifold=args.on_manifold,
+        T=args.steps
     )
     test_acc, train_acc = eval(model)
     singular_values, norms = weight_stats(model)
@@ -204,10 +207,18 @@ if __name__ == "__main__":
         "singular_values": singular_values,
         "norms": norms
     }
-
-    filename = f"update-{args.update}-lr-{args.lr}-wd-{args.wd}-seed-{args.seed}-epochs-{args.epochs}{'' if args.update != 'manifold_muon' else f'-steps-{args.steps}'}.pkl"
+    
+    filename = f"update-{args.update}-lr-{args.lr}-seed-{args.seed}-epochs-{args.epochs}"
+    if args.update == "adam":
+        filename += f"-wd-{args.wd}"
+    if args.update == "custom_muon":
+        filename += f"-steps-{args.steps}"
+    if args.update == "muon":
+        filename += f"-on_manifold-{args.on_manifold}"
+    if args.update == "manifold_muon":
+        filename += f"-steps-{args.steps}"
+    filename += ".pkl"
     os.makedirs("results", exist_ok=True)
-
     print(f"Saving results to {os.path.join('results', filename)}")
     with open(os.path.join("results", filename), "wb") as f:
         pickle.dump(results, f)
