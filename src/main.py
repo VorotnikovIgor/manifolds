@@ -43,9 +43,10 @@ class MLP(nn.Module):
 
 
 def train(epochs, initial_lr, update, wd, on_manifold, T):
+    # print('T =', T)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = MLP().to(device)
-    print(model.fc1.weight.reshape(-1)[:3])
+    # print(model.fc1.weight.reshape(-1)[:3])
     criterion = nn.CrossEntropyLoss()
 
     if update == AdamW:
@@ -60,7 +61,7 @@ def train(epochs, initial_lr, update, wd, on_manifold, T):
     if optimizer is None:
         # Project the weights to the manifold
         for p in model.parameters():
-            p.data = update(p.data, torch.zeros_like(p.data), eta=0, steps=T, on_manifold=on_manifold)
+            p.data = update(p.data, torch.zeros_like(p.data), eta=0)
 
     epoch_losses = []
     epoch_times = []
@@ -84,7 +85,7 @@ def train(epochs, initial_lr, update, wd, on_manifold, T):
             with torch.no_grad():
                 if optimizer is None:
                     for p in model.parameters():
-                        p.data = update(p, p.grad, eta=lr)
+                        p.data = update(p, p.grad, eta=lr, steps=T, on_manifold=on_manifold)
                 else:
                     for param_group in optimizer.param_groups:
                         param_group["lr"] = lr
