@@ -162,6 +162,7 @@ if __name__ == "__main__":
     parser.add_argument("--update", type=str, default="manifold_muon", choices=["manifold_muon", "hyperspherical_descent", "custom_muon", "muon", "adam"], help="Update rule to use.")
     parser.add_argument("--seed", type=int, default=42, help="Seed for the random number generator.")
     parser.add_argument("--wd", type=float, default=0.0, help="Weight decay for AdamW.")
+    parser.add_argument("--steps", type=int, default=100, help="Steps for manifold_muon.")
     args = parser.parse_args()
 
     # determinism flags
@@ -206,7 +207,7 @@ if __name__ == "__main__":
         "norms": norms
     }
 
-    filename = f"update-{args.update}-lr-{args.lr}-wd-{args.wd}-seed-{args.seed}-epochs-{args.epochs}.pkl"
+    filename = f"update-{args.update}-lr-{args.lr}-wd-{args.wd}-seed-{args.seed}-epochs-{args.epochs}{'' if args.update != 'manifold_muon' else f'-steps-{args.steps}'}.pkl"
     os.makedirs("results", exist_ok=True)
 
     print(f"Saving results to {os.path.join('results', filename)}")
