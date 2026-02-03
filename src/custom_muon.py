@@ -3,7 +3,7 @@ import torch
 from msign import msign
 
 @torch.no_grad()
-def manifold_muon(W, G, eta=0.1, alpha=0.01, steps=100, tol=1e-6):
+def manifold_muon(W, G, eta=0.1, alpha=0.01, steps=100, tol=1e-6, **kwargs):
     # Ensure that W and G are both tall matrices
     should_tranpose = W.shape[0] < W.shape[1]
     if should_tranpose:
@@ -112,7 +112,7 @@ def distance_from_tangent(w, g):
     m = w.T @ g + g.T @ w
     return torch.norm(m) ** 2 / 4, w @ m
 
-def custom_muon(W, G, eta=0.1, T=100, mode='ns', start='warm', params={'steps' : 4}):
+def custom_muon(W, G, eta=0.1, steps=100, mode='ns', start='warm', params={'steps' : 4}, **kwargs):
     should_tranpose = W.shape[0] < W.shape[1]
     if should_tranpose:
         W = W.T
@@ -130,7 +130,7 @@ def custom_muon(W, G, eta=0.1, T=100, mode='ns', start='warm', params={'steps' :
 
     # start = time.time()
     # As = []
-    for epoch in range(T):
+    for epoch in range(steps):
         A.grad = None
         with torch.enable_grad():
             if mode == 'ns':

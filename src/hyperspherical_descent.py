@@ -1,7 +1,7 @@
 import torch
 
 @torch.no_grad()
-def hyperspherical_descent(W, G, eta=0.1):
+def hyperspherical_descent(W, G, eta=0.1, **kwargs):
     w = W.flatten()
     g = G.flatten()
     # Compute update direction

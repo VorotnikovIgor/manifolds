@@ -3,7 +3,7 @@ import torch
 from msign import msign
 
 @torch.no_grad()
-def muon(W, G, eta=0.1, on_manifold=True):
+def muon(W, G, eta=0.1, on_manifold=True, **kwargs):
     # Ensure that W and G are both tall matrices
     should_tranpose = W.shape[0] < W.shape[1]
     if should_tranpose:
