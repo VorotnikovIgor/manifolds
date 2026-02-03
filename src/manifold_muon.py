@@ -13,6 +13,7 @@ def manifold_muon(W, G, eta=0.1, alpha=0.01, steps=100, tol=1e-6, **kwargs):
     Lambda = -0.25 * (W.T @ G + G.T @ W)
     # Ascend on the dual problem to find the update direction A
     for step in range(steps):
+        print(step)
         # Update the candidate direction A
         A = msign(G + 2 * W @ Lambda)
         # Measure deviation of A from the tangent space:
