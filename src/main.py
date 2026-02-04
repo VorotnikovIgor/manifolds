@@ -63,14 +63,15 @@ def train(epochs, initial_lr, update, wd, on_manifold, T):
         for p in model.parameters():
             p.data = update(p.data, torch.zeros_like(p.data), eta=0)
 
-    epoch_losses = []
+    train_losses = []
+    test_losses = []
     epoch_times = []
 
     for epoch in tqdm(range(epochs)):
         start_time = time.time()
         running_loss = 0.0
         # print(len(train_loader))
-        for i, (images, labels) in tqdm(enumerate(train_loader)):
+        for i, (images, labels) in enumerate(train_loader):
             images = images.to(device)
             labels = labels.to(device)
 
@@ -99,7 +100,7 @@ def train(epochs, initial_lr, update, wd, on_manifold, T):
         end_time = time.time()
         epoch_loss = running_loss / len(train_loader)
         epoch_time = end_time - start_time
-        epoch_losses.append(epoch_loss)
+        train_losses.append(epoch_loss)
         epoch_times.append(epoch_time)
         print(f"Epoch {epoch+1}, Loss: {epoch_loss}, Time: {epoch_time:.4f} seconds")
 
@@ -116,10 +117,10 @@ def train(epochs, initial_lr, update, wd, on_manifold, T):
                 running_loss += loss.item()
 
         epoch_loss = running_loss / len(test_loader)
-        epoch_losses.append(epoch_loss)
+        test_losses.append(epoch_loss)
         print(f"Epoch {epoch+1}, Loss: {epoch_loss}")
         eval(model)
-    return model, epoch_losses, epoch_times
+    return model, train_losses, test_losses, epoch_times
 
 
 def eval(model):
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     print(f"Training with: {args.update}")
     print(f"Epochs: {args.epochs} --- LR: {args.lr}", f"--- WD: {args.wd}" if args.update == "adam" else "")
 
-    model, epoch_losses, epoch_times = train(
+    model, train_losses, test_losses, epoch_times = train(
         epochs=args.epochs,
         initial_lr=args.lr,
         update=update,
@@ -203,7 +204,8 @@ if __name__ == "__main__":
         "seed": args.seed,
         "wd": args.wd,
         "update": args.update,
-        "epoch_losses": epoch_losses,
+        "train_losses": train_losses,
+        "test_losses": test_losses,
         "epoch_times": epoch_times,
         "test_acc": test_acc,
         "train_acc": train_acc,
